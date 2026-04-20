@@ -1,0 +1,24 @@
+# Design Rationale
+
+## Why these questions?
+The questions reflect real internal dialogue at the end of a workday. Instead of ideal answers, options capture hesitation, avoidance, and trade-offs people actually experience.
+
+## Branching logic
+Branching is based on:
+- Direct answers
+- Accumulated signals across axes
+
+This ensures deterministic but adaptive flow.
+
+## Psychological grounding
+- Axis 1: Rotter (Locus of Control), Dweck (Growth Mindset)
+- Axis 2: Campbell (Entitlement), Organ (OCB)
+- Axis 3: Maslow (Self-transcendence), Batson (Perspective-taking)
+
+## Why fixed options?
+Fixed options force clarity. The user must recognize themselves in predefined patterns, enabling consistent reflection.
+
+## Improvements
+- More granular signal weighting
+- UI layer for better experience
+- Additional mid-path reflections

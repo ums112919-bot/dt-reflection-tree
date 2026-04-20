@@ -1,0 +1,75 @@
+```mermaid
+graph TD
+
+START --> q1_opening
+q1_opening --> q2a_external_locus
+q1_opening --> q2b_mixed_locus
+q1_opening --> q2c_internal_locus
+
+q2a_external_locus --> d1_axis1_external
+q2b_mixed_locus --> d1_axis1_internal
+q2c_internal_locus --> d1_axis1_internal
+
+d1_axis1_external --> r1_reframe_external
+d1_axis1_internal --> r1_reframe_internal
+
+r1_reframe_external --> q3_axis1_followup
+r1_reframe_internal --> q3_axis1_followup
+
+q3_axis1_followup --> d2_axis1_final
+d2_axis1_final --> bridge1_to_axis2_contribution
+d2_axis1_final --> bridge1_to_axis2_entitlement_risk
+
+bridge1_to_axis2_contribution --> q4_contribution_entry
+bridge1_to_axis2_entitlement_risk --> q4_contribution_entry
+
+q4_contribution_entry --> q5a_contribution_path
+q4_contribution_entry --> q5b_neutral_path
+q4_contribution_entry --> q5c_entitlement_path
+
+q5a_contribution_path --> d3_contribution_signal
+q5b_neutral_path --> d3_entitlement_signal
+q5c_entitlement_path --> d3_entitlement_signal
+
+d3_contribution_signal --> r2_contribution_reframe
+d3_entitlement_signal --> r2_entitlement_reframe
+
+r2_contribution_reframe --> q6_axis2_closing
+r2_entitlement_reframe --> q6_axis2_closing
+
+q6_axis2_closing --> bridge2_to_axis3_narrow
+q6_axis2_closing --> bridge2_to_axis3_wide
+
+bridge2_to_axis3_narrow --> q7_radius_entry
+bridge2_to_axis3_wide --> q7_radius_entry
+
+q7_radius_entry --> q8a_wide_radius
+q7_radius_entry --> q8b_mid_radius
+q7_radius_entry --> q8c_narrow_radius
+
+q8a_wide_radius --> d5_wide_signal
+q8b_mid_radius --> d5_mid_signal
+q8c_narrow_radius --> d5_narrow_signal
+
+d5_wide_signal --> r3_wide_reframe
+d5_mid_signal --> r3_mid_reframe
+d5_narrow_signal --> r3_narrow_reframe
+
+r3_wide_reframe --> q9_closing_synthesis
+r3_mid_reframe --> q9_closing_synthesis
+r3_narrow_reframe --> q9_closing_synthesis
+
+q9_closing_synthesis --> pre_summary_landing
+pre_summary_landing --> d6_final_routing
+
+d6_final_routing --> summary_high_agency
+d6_final_routing --> summary_external_entitlement
+d6_final_routing --> summary_internal_narrow
+d6_final_routing --> summary_contribution_narrow
+d6_final_routing --> summary_balanced
+
+summary_high_agency --> end
+summary_external_entitlement --> end
+summary_internal_narrow --> end
+summary_contribution_narrow --> end
+summary_balanced --> end

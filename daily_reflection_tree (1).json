@@ -1,0 +1,696 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "title": "Daily Reflection Tree",
+    "description": "A deterministic end-of-day reflection flow across three psychological axes: Locus of Control, Value Orientation, and Perspective Radius.",
+    "author": "DeepThought Growth Teams",
+    "psychology_base": [
+      "Rotter (Locus of Control)",
+      "Dweck (Growth Mindset)",
+      "Campbell (Entitlement)",
+      "Organ (Organizational Citizenship Behavior)",
+      "Maslow (Self-transcendence)",
+      "Batson (Perspective-taking)"
+    ],
+    "axes": {
+      "axis1": {
+        "name": "Locus",
+        "poles": ["Victim (External)", "Victor (Internal)"],
+        "theory": "Rotter + Dweck"
+      },
+      "axis2": {
+        "name": "Contribution vs Entitlement",
+        "poles": ["Contribution", "Entitlement"],
+        "theory": "Campbell + Organ"
+      },
+      "axis3": {
+        "name": "Radius",
+        "poles": ["Self-focused (Narrow)", "Other-focused (Wide)"],
+        "theory": "Maslow + Batson"
+      }
+    },
+    "runtime_constraints": {
+      "llm_at_runtime": false,
+      "input_type": "fixed_options_only",
+      "deterministic": true
+    }
+  },
+  "state": {
+    "signals": {
+      "axis1": { "internal": 0, "external": 0 },
+      "axis2": { "contribution": 0, "entitlement": 0 },
+      "axis3": { "narrow": 0, "wide": 0 }
+    },
+    "answers": {}
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "type": "start",
+      "axis": null,
+      "text": "It's the end of the day. Before you close the laptop — take 4 minutes. Not to evaluate yourself. Just to see clearly.",
+      "options": null,
+      "next": "q1_opening",
+      "signals": null
+    },
+
+    {
+      "id": "q1_opening",
+      "type": "question",
+      "axis": "axis1",
+      "text": "When you think about today as a whole — what's the first honest thing that comes up?",
+      "options": [
+        "Things kept getting in the way of what I actually needed to do",
+        "I got some things done, but not the ones that mattered",
+        "I made choices I'm not sure I'd make again",
+        "It was mostly fine, but I left something unfinished that I shouldn't have"
+      ],
+      "next": {
+        "rules": [
+          { "condition": "answer=Things kept getting in the way of what I actually needed to do", "target": "q2a_external_locus", "signals": ["axis1:external"] },
+          { "condition": "answer=I got some things done, but not the ones that mattered", "target": "q2b_mixed_locus", "signals": ["axis1:external"] },
+          { "condition": "answer=I made choices I'm not sure I'd make again", "target": "q2c_internal_locus", "signals": ["axis1:internal"] },
+          { "condition": "answer=It was mostly fine, but I left something unfinished that I shouldn't have", "target": "q2c_internal_locus", "signals": ["axis1:internal"] }
+        ]
+      },
+      "signals": ["axis1:external", "axis1:internal"]
+    },
+
+    {
+      "id": "q2a_external_locus",
+      "type": "question",
+      "axis": "axis1",
+      "text": "When you say things kept getting in the way — what was most true about those things?",
+      "options": [
+        "They were genuinely out of my control (other people, systems, bad luck)",
+        "I could see them coming and I didn't protect my time",
+        "I said yes when I should have said no",
+        "I'm not sure — it just felt like friction everywhere"
+      ],
+      "next": {
+        "rules": [
+          { "condition": "answer=They were genuinely out of my control (other people, systems, bad luck)", "target": "d1_axis1_external", "signals": ["axis1:external"] },
+          { "condition": "answer=I could see them coming and I didn't protect my time", "target": "d1_axis1_internal", "signals": ["axis1:internal"] },
+          { "condition": "answer=I said yes when I should have said no", "target": "d1_axis1_internal", "signals": ["axis1:internal"] },
+          { "condition": "answer=I'm not sure — it just felt like friction everywhere", "target": "d1_axis1_external", "signals": ["axis1:external"] }
+        ]
+      },
+      "signals": ["axis1:external", "axis1:internal"]
+    },
+
+    {
+      "id": "q2b_mixed_locus",
+      "type": "question",
+      "axis": "axis1",
+      "text": "The things that mattered but didn't get done — who decided they didn't get prioritized?",
+      "options": [
+        "Honestly, I did. Something else felt more urgent in the moment",
+        "Someone else's urgency kept crowding mine out",
+        "I kept waiting for a better window that didn't come",
+        "I didn't actually know what mattered most until too late"
+      ],
+      "next": {
+        "rules": [
+          { "condition": "answer=Honestly, I did. Something else felt more urgent in the moment", "target": "d1_axis1_internal", "signals": ["axis1:internal"] },
+          { "condition": "answer=Someone else's urgency kept crowding mine out", "target": "d1_axis1_external", "signals": ["axis1:external"] },
+          { "condition": "answer=I kept waiting for a better window that didn't come", "target": "d1_axis1_internal", "signals": ["axis1:internal"] },
+          { "condition": "answer=I didn't actually know what mattered most until too late", "target": "d1_axis1_internal", "signals": ["axis1:internal"] }
+        ]
+      },
+      "signals": ["axis1:internal", "axis1:external"]
+    },
+
+    {
+      "id": "q2c_internal_locus",
+      "type": "question",
+      "axis": "axis1",
+      "text": "You mentioned a choice you'd reconsider. When you made it — what was actually driving you?",
+      "options": [
+        "I wanted to avoid a conflict",
+        "I was tired and took the path of least resistance",
+        "I overestimated what I could handle",
+        "I convinced myself it was fine when it probably wasn't"
+      ],
+      "next": "d1_axis1_internal",
+      "signals": ["axis1:internal"]
+    },
+
+    {
+      "id": "d1_axis1_external",
+      "type": "decision",
+      "axis": "axis1",
+      "text": "Routing based on how much external attribution was present in {q2a_external_locus.answer}.",
+      "options": null,
+      "next": {
+        "rules": [
+          { "condition": "state.axis1.internal > state.axis1.external", "target": "r1_reframe_internal" },
+          { "condition": "default", "target": "r1_reframe_external" }
+        ]
+      },
+      "signals": ["axis1:external"]
+    },
+
+    {
+      "id": "d1_axis1_internal",
+      "type": "decision",
+      "axis": "axis1",
+      "text": "Routing based on degree of ownership present in {q2b_mixed_locus.answer} or {q2c_internal_locus.answer}.",
+      "options": null,
+      "next": {
+        "rules": [
+          { "condition": "state.axis1.internal >= 1", "target": "r1_reframe_internal" },
+          { "condition": "default", "target": "r1_reframe_external" }
+        ]
+      },
+      "signals": ["axis1:internal"]
+    },
+
+    {
+      "id": "r1_reframe_external",
+      "type": "reflection",
+      "axis": "axis1",
+      "text": "You described today mostly through what happened *to* you. That's sometimes accurate — the day really was full of things outside your control. But here's a small provocation: if you could rewind just one moment and respond differently, what would it be? Not to judge it — just to notice that one existed.",
+      "options": null,
+      "next": "q3_axis1_followup",
+      "signals": null
+    },
+
+    {
+      "id": "r1_reframe_internal",
+      "type": "reflection",
+      "axis": "axis1",
+      "text": "You noticed your own hand in how the day went. That kind of honesty is uncomfortable and useful in equal measure. The question isn't whether you could have done better — it's what that insight is worth tomorrow. What's one concrete thing today showed you about how you actually operate under pressure?",
+      "options": null,
+      "next": "q3_axis1_followup",
+      "signals": null
+    },
+
+    {
+      "id": "q3_axis1_followup",
+      "type": "question",
+      "axis": "axis1",
+      "text": "Right now, thinking about tomorrow — what's your default mode when something unexpected lands on your plate?",
+      "options": [
+        "I absorb it and figure it out, even if it costs me",
+        "I push back and negotiate the scope",
+        "I do it but I carry the resentment quietly",
+        "I try to delegate or defer, with mixed results"
+      ],
+      "next": {
+        "rules": [
+          { "condition": "answer=I absorb it and figure it out, even if it costs me", "target": "d2_axis1_final", "signals": ["axis1:internal"] },
+          { "condition": "answer=I push back and negotiate the scope", "target": "d2_axis1_final", "signals": ["axis1:internal"] },
+          { "condition": "answer=I do it but I carry the resentment quietly", "target": "d2_axis1_final", "signals": ["axis1:external"] },
+          { "condition": "answer=I try to delegate or defer, with mixed results", "target": "d2_axis1_final", "signals": ["axis1:external"] }
+        ]
+      },
+      "signals": ["axis1:internal", "axis1:external"]
+    },
+
+    {
+      "id": "d2_axis1_final",
+      "type": "decision",
+      "axis": "axis1",
+      "text": "Final axis1 routing — determining bridge tone toward axis2 based on locus signal balance.",
+      "options": null,
+      "next": {
+        "rules": [
+          { "condition": "answer=I do it but I carry the resentment quietly", "target": "bridge1_to_axis2_entitlement_risk" },
+          { "condition": "answer=I absorb it and figure it out, even if it costs me", "target": "bridge1_to_axis2_contribution" },
+          { "condition": "state.axis1.external > state.axis1.internal", "target": "bridge1_to_axis2_entitlement_risk" },
+          { "condition": "default", "target": "bridge1_to_axis2_contribution" }
+        ]
+      },
+      "signals": null
+    },
+
+    {
+      "id": "bridge1_to_axis2_contribution",
+      "type": "bridge",
+      "axis": null,
+      "text": "You've been sitting with how the day moved — where you steered and where you got swept. Now let's shift the lens slightly. From how you spent your energy today, let's look at what that energy was *for*.",
+      "options": null,
+      "next": "q4_contribution_entry",
+      "signals": null
+    },
+
+    {
+      "id": "bridge1_to_axis2_entitlement_risk",
+      "type": "bridge",
+      "axis": null,
+      "text": "Carrying quiet resentment about what gets asked of you is more common than people admit. Before we go further — let's look honestly at the exchange between you and your work today. Not to audit you. Just to see the ledger clearly.",
+      "options": null,
+      "next": "q4_contribution_entry",
+      "signals": null
+    },
+
+    {
+      "id": "q4_contribution_entry",
+      "type": "question",
+      "axis": "axis2",
+      "text": "If you had to describe the main thing you actually *gave* today — your real output, not what was on the task list — what would it be?",
+      "options": [
+        "I helped someone through something that wasn't officially my problem",
+        "I completed work that moves something forward, even if no one noticed",
+        "I showed up reliably, which is its own kind of contribution",
+        "Honestly, I'm not sure I gave much today that mattered to anyone else"
+      ],
+      "next": {
+        "rules": [
+          { "condition": "answer=I helped someone through something that wasn't officially my problem", "target": "q5a_contribution_path", "signals": ["axis2:contribution"] },
+          { "condition": "answer=I completed work that moves something forward, even if no one noticed", "target": "q5a_contribution_path", "signals": ["axis2:contribution"] },
+          { "condition": "answer=I showed up reliably, which is its own kind of contribution", "target": "q5b_neutral_path", "signals": ["axis2:contribution"] },
+          { "condition": "answer=Honestly, I'm not sure I gave much today that mattered to anyone else", "target": "q5c_entitlement_path", "signals": ["axis2:entitlement"] }
+        ]
+      },
+      "signals": ["axis2:contribution", "axis2:entitlement"]
+    },
+
+    {
+      "id": "q5a_contribution_path",
+      "type": "question",
+      "axis": "axis2",
+      "text": "When you contributed today — what was underneath it? Be honest with yourself.",
+      "options": [
+        "I genuinely wanted to — it felt like the right thing",
+        "It was partly habit, partly not wanting to be seen as someone who doesn't help",
+        "I knew it would come back to me eventually, so it made sense",
+        "Some mix of all of these — motives are messy"
+      ],
+      "next": {
+        "rules": [
+          { "condition": "answer=I genuinely wanted to — it felt like the right thing", "target": "d3_contribution_signal", "signals": ["axis2:contribution"] },
+          { "condition": "answer=It was partly habit, partly not wanting to be seen as someone who doesn't help", "target": "d3_contribution_signal", "signals": ["axis2:contribution"] },
+          { "condition": "answer=I knew it would come back to me eventually, so it made sense", "target": "d3_entitlement_signal", "signals": ["axis2:entitlement"] },
+          { "condition": "answer=Some mix of all of these — motives are messy", "target": "d3_contribution_signal", "signals": ["axis2:contribution"] }
+        ]
+      },
+      "signals": ["axis2:contribution", "axis2:entitlement"]
+    },
+
+    {
+      "id": "q5b_neutral_path",
+      "type": "question",
+      "axis": "axis2",
+      "text": "Showing up reliably is real. But on a day like today — did that feel like enough to you?",
+      "options": [
+        "Yes, sustaining consistency is underrated and I stand by it",
+        "Not really — I think I was playing it safe",
+        "I've been coasting and I know it but I haven't changed anything",
+        "I was preserving energy for something bigger that didn't happen"
+      ],
+      "next": {
+        "rules": [
+          { "condition": "answer=Yes, sustaining consistency is underrated and I stand by it", "target": "d3_contribution_signal", "signals": ["axis2:contribution"] },
+          { "condition": "answer=Not really — I think I was playing it safe", "target": "d3_entitlement_signal", "signals": ["axis2:entitlement"] },
+          { "condition": "answer=I've been coasting and I know it but I haven't changed anything", "target": "d3_entitlement_signal", "signals": ["axis2:entitlement"] },
+          { "condition": "answer=I was preserving energy for something bigger that didn't happen", "target": "d3_contribution_signal", "signals": ["axis2:contribution"] }
+        ]
+      },
+      "signals": ["axis2:contribution", "axis2:entitlement"]
+    },
+
+    {
+      "id": "q5c_entitlement_path",
+      "type": "question",
+      "axis": "axis2",
+      "text": "On a day when you felt you didn't give much — what were you most aware of instead?",
+      "options": [
+        "What I wasn't getting back for what I've already put in",
+        "Whether the work I do is actually valued here",
+        "Mostly just trying to get through the day without making it worse",
+        "That I was holding back, and I know why, but I haven't said it"
+      ],
+      "next": {
+        "rules": [
+          { "condition": "answer=What I wasn't getting back for what I've already put in", "target": "d3_entitlement_signal", "signals": ["axis2:entitlement"] },
+          { "condition": "answer=Whether the work I do is actually valued here", "target": "d3_entitlement_signal", "signals": ["axis2:entitlement"] },
+          { "condition": "answer=Mostly just trying to get through the day without making it worse", "target": "d3_contribution_signal", "signals": ["axis2:contribution"] },
+          { "condition": "answer=That I was holding back, and I know why, but I haven't said it", "target": "d3_entitlement_signal", "signals": ["axis2:entitlement"] }
+        ]
+      },
+      "signals": ["axis2:entitlement", "axis2:contribution"]
+    },
+
+    {
+      "id": "d3_contribution_signal",
+      "type": "decision",
+      "axis": "axis2",
+      "text": "Contribution orientation detected. Routing to reflection that deepens contribution awareness.",
+      "options": null,
+      "next": "r2_contribution_reframe",
+      "signals": ["axis2:contribution"]
+    },
+
+    {
+      "id": "d3_entitlement_signal",
+      "type": "decision",
+      "axis": "axis2",
+      "text": "Entitlement orientation detected. Routing to reflection that challenges the ledger framing non-judgmentally.",
+      "options": null,
+      "next": "r2_entitlement_reframe",
+      "signals": ["axis2:entitlement"]
+    },
+
+    {
+      "id": "r2_contribution_reframe",
+      "type": "reflection",
+      "axis": "axis2",
+      "text": "You gave something today — even if the motives were mixed, or no one acknowledged it, or it felt small. Mixed motives are normal. The interesting question isn't *why* you contributed, but whether it costs you more than it should to do so. If it always feels expensive, that's worth examining. If it feels like part of how you work, that's a resource, not a burden.",
+      "options": null,
+      "next": "q6_axis2_closing",
+      "signals": null
+    },
+
+    {
+      "id": "r2_entitlement_reframe",
+      "type": "reflection",
+      "axis": "axis2",
+      "text": "There's a version of the entitlement trap that's totally rational: you've given a lot, you're not seeing it returned, you're recalibrating. That's not selfishness — it's a response to a perceived imbalance. But sometimes the ledger we keep is internal only, and the people around us are keeping a different one. Worth asking: does anyone around you know what you've been putting in?",
+      "options": null,
+      "next": "q6_axis2_closing",
+      "signals": null
+    },
+
+    {
+      "id": "q6_axis2_closing",
+      "type": "question",
+      "axis": "axis2",
+      "text": "Think about the one person at work whose effort you most underestimated or overlooked today. What was going on for them that you probably didn't register?",
+      "options": [
+        "I actually don't know — I didn't think about them much",
+        "They were dealing with something hard and I knew but didn't check in",
+        "They did something quietly that made my day easier and I didn't acknowledge it",
+        "I was too in my own head to track anyone else's reality today"
+      ],
+      "next": {
+        "rules": [
+          { "condition": "answer=I actually don't know — I didn't think about them much", "target": "d4_axis2_narrow" },
+          { "condition": "answer=They were dealing with something hard and I knew but didn't check in", "target": "d4_axis2_wide" },
+          { "condition": "answer=They did something quietly that made my day easier and I didn't acknowledge it", "target": "d4_axis2_wide" },
+          { "condition": "answer=I was too in my own head to track anyone else's reality today", "target": "d4_axis2_narrow" }
+        ]
+      },
+      "signals": null
+    },
+
+    {
+      "id": "d4_axis2_narrow",
+      "type": "decision",
+      "axis": "axis2",
+      "text": "Self-focused signal on closing axis2 question. Bridging with higher urgency to axis3.",
+      "options": null,
+      "next": "bridge2_to_axis3_narrow",
+      "signals": ["axis2:entitlement"]
+    },
+
+    {
+      "id": "d4_axis2_wide",
+      "type": "decision",
+      "axis": "axis2",
+      "text": "Other-awareness signal on closing axis2 question. Bridging with gentler arc to axis3.",
+      "options": null,
+      "next": "bridge2_to_axis3_wide",
+      "signals": ["axis2:contribution"]
+    },
+
+    {
+      "id": "bridge2_to_axis3_narrow",
+      "type": "bridge",
+      "axis": null,
+      "text": "Most days at work feel like solo performances. You're managing your own load, your own reputation, your own exhaustion. That's fair — it really does take most of what you have. But there's one more layer worth visiting before you close out: what happens when you zoom out from yourself?",
+      "options": null,
+      "next": "q7_radius_entry",
+      "signals": null
+    },
+
+    {
+      "id": "bridge2_to_axis3_wide",
+      "type": "bridge",
+      "axis": null,
+      "text": "You've shown some awareness of what others around you were carrying today. Now let's take that further — to a slightly wider frame than the people you interact with directly.",
+      "options": null,
+      "next": "q7_radius_entry",
+      "signals": null
+    },
+
+    {
+      "id": "q7_radius_entry",
+      "type": "question",
+      "axis": "axis3",
+      "text": "Beyond your own workload today — was there anyone in your immediate team whose situation you understood from their point of view, not just your own?",
+      "options": [
+        "Yes, I actively thought about what something must feel like from their side",
+        "Sort of — I noticed something was off but didn't try to understand it",
+        "Not really — I was too focused on my own lane to track anyone else's",
+        "I tried to, but honestly I projected my own assumptions onto what they were feeling"
+      ],
+      "next": {
+        "rules": [
+          { "condition": "answer=Yes, I actively thought about what something must feel like from their side", "target": "q8a_wide_radius" },
+          { "condition": "answer=Sort of — I noticed something was off but didn't try to understand it", "target": "q8b_mid_radius" },
+          { "condition": "answer=Not really — I was too focused on my own lane to track anyone else's", "target": "q8c_narrow_radius" },
+          { "condition": "answer=I tried to, but honestly I projected my own assumptions onto what they were feeling", "target": "q8b_mid_radius" }
+        ]
+      },
+      "signals": null
+    },
+
+    {
+      "id": "q8a_wide_radius",
+      "type": "question",
+      "axis": "axis3",
+      "text": "When you took their perspective — what did it change about how you acted or responded?",
+      "options": [
+        "I softened something I was about to say or do",
+        "I gave them space instead of pushing for what I needed",
+        "I asked a question I wouldn't have otherwise asked",
+        "It changed my understanding but I didn't actually do anything different"
+      ],
+      "next": {
+        "rules": [
+          { "condition": "answer=I softened something I was about to say or do", "target": "d5_wide_signal" },
+          { "condition": "answer=I gave them space instead of pushing for what I needed", "target": "d5_wide_signal" },
+          { "condition": "answer=I asked a question I wouldn't have otherwise asked", "target": "d5_wide_signal" },
+          { "condition": "answer=It changed my understanding but I didn't actually do anything different", "target": "d5_mid_signal" }
+        ]
+      },
+      "signals": null
+    },
+
+    {
+      "id": "q8b_mid_radius",
+      "type": "question",
+      "axis": "axis3",
+      "text": "You noticed something in someone around you but didn't fully engage with it. What usually stops you from going further with that?",
+      "options": [
+        "I don't want to make it weird or overstep",
+        "I'm not sure they'd want me to — they seem like they prefer to keep it professional",
+        "I'm honestly a bit burned out and I don't have the bandwidth for other people's stuff",
+        "I assume they're handling it and I'd just be in the way"
+      ],
+      "next": "d5_mid_signal",
+      "signals": null
+    },
+
+    {
+      "id": "q8c_narrow_radius",
+      "type": "question",
+      "axis": "axis3",
+      "text": "If you had to describe the emotional state of one person you worked with today — without guessing or defaulting to 'fine' — what would you actually say?",
+      "options": [
+        "I genuinely don't know — I didn't look that closely",
+        "Probably stressed, but I didn't ask",
+        "They seemed okay but I realize I might have just been seeing what was convenient",
+        "I was probably the one making their day harder, to be honest"
+      ],
+      "next": "d5_narrow_signal",
+      "signals": null
+    },
+
+    {
+      "id": "d5_wide_signal",
+      "type": "decision",
+      "axis": "axis3",
+      "text": "Wide radius signal confirmed. Routing to self-transcendence reflection.",
+      "options": null,
+      "next": "r3_wide_reframe",
+      "signals": ["axis3:wide"]
+    },
+
+    {
+      "id": "d5_mid_signal",
+      "type": "decision",
+      "axis": "axis3",
+      "text": "Mid-radius signal. Routing to perspective-broadening reflection.",
+      "options": null,
+      "next": "r3_mid_reframe",
+      "signals": ["axis3:narrow", "axis3:wide"]
+    },
+
+    {
+      "id": "d5_narrow_signal",
+      "type": "decision",
+      "axis": "axis3",
+      "text": "Narrow radius signal. Routing to gentle confrontation of blind spot.",
+      "options": null,
+      "next": "r3_narrow_reframe",
+      "signals": ["axis3:narrow"]
+    },
+
+    {
+      "id": "r3_wide_reframe",
+      "type": "reflection",
+      "axis": "axis3",
+      "text": "You moved toward someone else's experience today — enough to actually adjust your own behavior based on it. That's not easy, and it's not automatic for most people. The research behind perspective-taking (Batson) is clear: it only changes behavior when you actually *inhabit* the other person's position, not just acknowledge it intellectually. You did that. The question for tomorrow is: who rarely gets that from you?",
+      "options": null,
+      "next": "q9_closing_synthesis",
+      "signals": null
+    },
+
+    {
+      "id": "r3_mid_reframe",
+      "type": "reflection",
+      "axis": "axis3",
+      "text": "You're aware of others around you — you notice when something's off — but there's a gap between noticing and engaging. That gap is often filled by reasonable caution: not wanting to overstep, not having bandwidth, not being sure. But gaps have a cost, mostly invisible. The person on the other side of that unasked question doesn't know you noticed. To them, you just moved on.",
+      "options": null,
+      "next": "q9_closing_synthesis",
+      "signals": null
+    },
+
+    {
+      "id": "r3_narrow_reframe",
+      "type": "reflection",
+      "axis": "axis3",
+      "text": "Today your radius was tight — mostly yourself. That's not a moral failure. It might have been survival. But here's the thing about consistently narrow radius: you start to see your own experience as the default, and other people's as deviations from it. Over time, that makes collaboration feel like a negotiation rather than a shared project. Not every day needs to be wide. But it's worth noticing when the pattern becomes the norm.",
+      "options": null,
+      "next": "q9_closing_synthesis",
+      "signals": null
+    },
+
+    {
+      "id": "q9_closing_synthesis",
+      "type": "question",
+      "axis": "axis3",
+      "text": "Last one. If you imagine the version of yourself at work who you'd actually want to be — not perfect, just a bit more intentional — what's the single thing that version does differently than you did today?",
+      "options": [
+        "They say no to the thing that drains them before it does",
+        "They make one person's day easier without waiting to be asked",
+        "They do the hard thing instead of the easy adjacent thing",
+        "They're present in a conversation instead of already in the next one"
+      ],
+      "next": {
+        "rules": [
+          { "condition": "answer=They say no to the thing that drains them before it does", "target": "pre_summary_landing", "signals": ["axis1:internal"] },
+          { "condition": "answer=They make one person's day easier without waiting to be asked", "target": "pre_summary_landing", "signals": ["axis3:wide"] },
+          { "condition": "answer=They do the hard thing instead of the easy adjacent thing", "target": "pre_summary_landing", "signals": ["axis1:internal"] },
+          { "condition": "answer=They're present in a conversation instead of already in the next one", "target": "pre_summary_landing", "signals": ["axis3:wide"] }
+        ]
+      },
+      "signals": ["axis1:internal", "axis3:wide"]
+    },
+
+    {
+      "id": "pre_summary_landing",
+      "type": "reflection",
+      "axis": null,
+      "text": "You've now looked at three things: how you handled what the day threw at you, what you actually gave, and how much of your attention reached beyond yourself. Most people don't pause long enough to see all three at once. You did. That's not a small thing at the end of a long day. Here's what the picture looks like from here.",
+      "options": null,
+      "next": "d6_final_routing",
+      "signals": null
+    },
+
+    {
+      "id": "d6_final_routing",
+      "type": "decision",
+      "axis": null,
+      "text": "Final routing: determines summary tone based on full signal profile across all three axes.",
+      "options": null,
+      "next": {
+        "rules": [
+          {
+            "condition": "state.axis1.internal > state.axis1.external AND state.axis2.contribution > state.axis2.entitlement AND state.axis3.wide > state.axis3.narrow",
+            "target": "summary_high_agency"
+          },
+          {
+            "condition": "state.axis1.external > state.axis1.internal AND state.axis2.entitlement > state.axis2.contribution",
+            "target": "summary_external_entitlement"
+          },
+          {
+            "condition": "state.axis1.internal >= state.axis1.external AND state.axis3.narrow > state.axis3.wide",
+            "target": "summary_internal_narrow"
+          },
+          {
+            "condition": "state.axis2.contribution >= state.axis2.entitlement AND state.axis3.narrow > state.axis3.wide",
+            "target": "summary_contribution_narrow"
+          },
+          {
+            "condition": "default",
+            "target": "summary_balanced"
+          }
+        ]
+      },
+      "signals": null
+    },
+
+    {
+      "id": "summary_high_agency",
+      "type": "summary",
+      "axis": null,
+      "text": "You started today saying '{q1_opening.answer}'. Here's what the rest of the reflection showed: you took more ownership than you deflected — that's the clearest signal across the whole flow. You gave without a fully transactional lens; the contribution was real, not performative. And you widened your view enough to actually change something. That last part is the hardest. — Tomorrow's single lever: The version of you who showed up today at their best — what did they do in the *first hour* that made the rest possible? That's the thing to protect.",
+      "options": null,
+      "next": "end",
+      "signals": null
+    },
+
+    {
+      "id": "summary_external_entitlement",
+      "type": "summary",
+      "axis": null,
+      "text": "You started today saying '{q1_opening.answer}'. That framing held through most of what followed: you felt more acted upon than acting, and the ledger of what you're owed sat closer to the surface than what you put in. That's not a character flaw — it's usually a signal that something in the exchange is off and hasn't been named. But the ledger might only be visible to you. — Tomorrow's single lever: Pick one moment where you usually wait for conditions to improve — and do the thing without waiting. See what that costs you and what it returns.",
+      "options": null,
+      "next": "end",
+      "signals": null
+    },
+
+    {
+      "id": "summary_internal_narrow",
+      "type": "summary",
+      "axis": null,
+      "text": "You started today saying '{q1_opening.answer}'. And through the reflection, you saw your own hand in it — which is harder to do than most people manage on a tired evening. You gave in some form today, and the quality of it was real. Where the picture narrows: your attention stayed mostly within your own orbit, and the people around you were mostly backdrop. — Tomorrow's single lever: You named what the more intentional version of you would do differently: '{q9_closing_synthesis.answer}'. That one thing — do it before noon tomorrow, while this is still fresh.",
+      "options": null,
+      "next": "end",
+      "signals": null
+    },
+
+    {
+      "id": "summary_contribution_narrow",
+      "type": "summary",
+      "axis": null,
+      "text": "You started today saying '{q1_opening.answer}'. The contribution was real — you gave something today, even if no one made a fuss about it. The mixed part is locus: some ownership, some friction that came from outside. Where the gap shows up is radius — the giving stayed within your immediate frame. You contributed, but your awareness of who else was in the room was limited. — Tomorrow's single lever: One person in your orbit is probably carrying something you don't know about. You don't need to fix it. Just notice it. That's the shift.",
+      "options": null,
+      "next": "end",
+      "signals": null
+    },
+
+    {
+      "id": "summary_balanced",
+      "type": "summary",
+      "axis": null,
+      "text": "You started today saying '{q1_opening.answer}'. The rest of the reflection held that ambiguity: some ownership, some friction, some giving, some withholding, some awareness of others — none of it tipping cleanly to one side. That's an honest day, and honesty is a decent place to land. — Tomorrow's single lever: You said the more intentional version of you would do this differently: '{q9_closing_synthesis.answer}'. One concrete version of that — not a plan, just one action — before the day gets loud.",
+      "options": null,
+      "next": "end",
+      "signals": null
+    },
+
+    {
+      "id": "end",
+      "type": "end",
+      "axis": null,
+      "text": "That's it. Close this and go be somewhere that isn't work.",
+      "options": null,
+      "next": null,
+      "signals": null
+    }
+  ]
+}
